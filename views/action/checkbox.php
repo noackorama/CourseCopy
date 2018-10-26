@@ -1,0 +1,1 @@
+<input type="checkbox" name="c[]" value="<?= htmlReady($course_id) ?>">

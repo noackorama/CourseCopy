@@ -1,0 +1,6 @@
+pluginname=CourseCopy
+pluginclassname=CourseCopy
+version=1.0
+origin=data-quest
+studipMinVersion=3.4
+studipMaxVersion=3.6
