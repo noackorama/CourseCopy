@@ -19,6 +19,8 @@ class CopyController extends PluginController
     public function process_action()
     {
         if (Request::isPost()) {
+            CSRFProtection::verifyUnsafeRequest();
+
             $dozent = null;
             if (Request::option("dozent_id")) {
                 $dozent = User::find(Request::option("dozent_id"));
@@ -113,6 +115,11 @@ class CopyController extends PluginController
                             'description' => _("Ablage für allgemeine Ordner und Dokumente der Veranstaltung")
                         ));
 
+                        $copy_regular_room_assignments = false;
+                        if (Request::get('regular_room_assignments')) {
+                            $copy_regular_room_assignments = true;
+                        }
+
                         if (Request::get("cycles")) {
                             foreach ($oldcourse->cycles as $cycledate) {
                                 $newcycle = new SeminarCycleDate();
@@ -122,6 +129,39 @@ class CopyController extends PluginController
                                 $newcycle['mkdate'] = time();
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();
+
+                                if ($copy_regular_room_assignments) {
+                                    //Check which room have been assigned to the
+                                    //"old" course's dates. If it was always
+                                    //the same room we can copy the regular
+                                    //assignments and use that room, if it is
+                                    //available.
+
+                                    $old_room = null;
+                                    $room = null;
+                                    foreach ($cycledate->dates as $date) {
+                                        if ($date->room_assignment) {
+                                            if ($date->room_assignment->room instanceof Resource) {
+                                                $old_room = $room;
+                                                $room = $date->room_assignment->room->getDerivedClassInstance();
+                                                if (($old_room instanceof Room) && ($room->id != $old_room->id)) {
+                                                    //The rooms differ: we can skip
+                                                    //copying the assignments.
+                                                    $room = null;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if ($room == null) {
+                                        continue;
+                                    }
+                                    //Create new assignments.
+                                    foreach ($newcycle->dates as $date) {
+                                        
+                                    }
+                                }
                             }
                         }
                     }

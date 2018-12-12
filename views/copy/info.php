@@ -1,5 +1,6 @@
 <form class="default" action="<?= PluginEngine::getLink($plugin, array(), "copy/process") ?>" method="post">
 
+    <?= CSRFProtection::tokenTag() ?>
     <? foreach (Request::getArray("c") as $course_id) : ?>
         <input type="hidden" name="c[]" value="<?= htmlReady($course_id) ?>">
     <? endforeach ?>
@@ -27,6 +28,10 @@
         <label>
             <input type="checkbox" name="cycles" value="1" checked>
             <?= _("Regelmäßige Termine mit kopieren") ?>
+        </label>
+        <label>
+            <input type="checkbox" name="regular_room_assignments" value="1">
+            <?= _('Raumbuchungen von regelmäßigen Terminen kopieren') ?>
         </label>
     </fieldset>
     <div data-dialog-button>
