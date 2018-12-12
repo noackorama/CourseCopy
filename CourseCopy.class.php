@@ -9,7 +9,7 @@ class CourseCopy extends StudIPPlugin implements AdminCourseAction
 
     public function useMultimode() {
         if (version_compare($GLOBALS['SOFTWARE_VERSION'], "3.4.99", ">=")) {
-            //Damit es im Dialog geöffnet wird
+            //Damit es im Dialog geÃ¶ffnet wird
             return \Studip\Button::createAccept(_("Kopieren"), "edit", array('data-dialog' => 1));
         } else {
             return _("Kopieren");

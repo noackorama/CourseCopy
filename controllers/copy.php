@@ -110,7 +110,7 @@ class CopyController extends PluginController
                             'seminar_id' => $newcourse->getId(),
                             'user_id' => $GLOBALS['user']->id,
                             'name' => _("Allgemeiner Dateiordner"),
-                            'description' => _("Ablage f¸r allgemeine Ordner und Dokumente der Veranstaltung")
+                            'description' => _("Ablage f√ºr allgemeine Ordner und Dokumente der Veranstaltung")
                         ));
 
                         if (Request::get("cycles")) {
