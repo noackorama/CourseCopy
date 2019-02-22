@@ -5,6 +5,7 @@ class CourseCopy extends StudIPPlugin implements AdminCourseAction
     public function __construct()
     {
         bindtextdomain('CourseCopy', __DIR__ . '/locale');
+        parent::__construct();
     }
 
 
