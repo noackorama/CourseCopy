@@ -97,23 +97,25 @@ class CopyController extends PluginController
                             $newentry->store();
                         }
 
-                        //Dateiordner
-                        $insert_folder = DBManager::get()->prepare("
-                            INSERT IGNORE INTO folder
-                            SET folder_id = MD5(CONCAT(:seminar_id, 'allgemeine_dateien')),
-                                range_id = :seminar_id,
-                                user_id = :user_id,
-                                name = :name,
-                                description = :description,
-                                mkdate = UNIX_TIMESTAMP(),
-                                chdate = UNIX_TIMESTAMP()
-                        ");
-                        $insert_folder->execute(array(
-                            'seminar_id' => $newcourse->getId(),
-                            'user_id' => $GLOBALS['user']->id,
-                            'name' => _("Allgemeiner Dateiordner"),
-                            'description' => _("Ablage für allgemeine Ordner und Dokumente der Veranstaltung")
-                        ));
+                        if (version_compare($GLOBALS['SOFTWARE_VERSION'], "3.99.99", "<")) {
+                            //Document folders (Stud.IP 3.5)
+                            $insert_folder = DBManager::get()->prepare("
+                                INSERT IGNORE INTO folder
+                                SET folder_id = MD5(CONCAT(:seminar_id, 'allgemeine_dateien')),
+                                    range_id = :seminar_id,
+                                    user_id = :user_id,
+                                    name = :name,
+                                    description = :description,
+                                    mkdate = UNIX_TIMESTAMP(),
+                                    chdate = UNIX_TIMESTAMP()
+                            ");
+                            $insert_folder->execute(array(
+                                'seminar_id' => $newcourse->getId(),
+                                'user_id' => $GLOBALS['user']->id,
+                                'name' => _("Allgemeiner Dateiordner"),
+                                'description' => _("Ablage für allgemeine Ordner und Dokumente der Veranstaltung")
+                            ));
+                        }
 
                         $copy_regular_room_assignments = false;
                         if (Request::get('regular_room_assignments')) {
@@ -141,9 +143,9 @@ class CopyController extends PluginController
                                     $room = null;
                                     foreach ($cycledate->dates as $date) {
                                         if ($date->room_assignment) {
-                                            if ($date->room_assignment->room instanceof Resource) {
+                                            if ($date->room_assignment->resource instanceof Resource) {
                                                 $old_room = $room;
-                                                $room = $date->room_assignment->room->getDerivedClassInstance();
+                                                $room = $date->room_assignment->resource->getDerivedClassInstance();
                                                 if (($old_room instanceof Room) && ($room->id != $old_room->id)) {
                                                     //The rooms differ: we can skip
                                                     //copying the assignments.
@@ -157,9 +159,40 @@ class CopyController extends PluginController
                                     if ($room == null) {
                                         continue;
                                     }
-                                    //Create new assignments.
-                                    foreach ($newcycle->dates as $date) {
-                                        
+
+                                    //Check the user's permissions:
+                                    //If the user has permissions to book the room,
+                                    //create room bookings. If no booking permissions
+                                    //are defined, create room requests.
+
+                                    $has_booking_rights = $room->userHasPermission(
+                                        User::findCurrent(),
+                                        'autor'
+                                    );
+
+                                    if ($has_booking_rights) {
+                                        foreach ($newcycle->dates as $date) {
+                                            //Create new assignments.
+                                            $assignment = new ResourceAssignment();
+                                            $assignment->resource_id = $room->id;
+                                            $assignment->range_id = $newcourse->id;
+                                            $assignment->booking_user_id = $GLOBALS['user']->id;
+                                            $assignment->assignment_type = '0';
+                                            $assignment->begin = $date->date;
+                                            $assignment->end = $date->end_time;
+                                            $assignment->repeat_end = '0';
+                                            $assignment->repeat_quantity = '0';
+                                            $assignment->repetition_interval = '';
+                                            $assignment->store();
+                                        }
+                                    } else {
+                                        //Create a resource request for the cycle:
+                                        $request = new ResourceRequest();
+                                        $request->category_id = $room->category_id;
+                                        $request->resource_id = $room->id;
+                                        $request->metadate_id = $newcycle->id;
+                                        $request->user_id = $GLOBALS['user']->id;
+                                        $request->store();
                                     }
                                 }
                             }
