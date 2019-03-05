@@ -26,7 +26,7 @@
 
         <label>
             <input type="checkbox" name="cycles" value="1" checked>
-            <?= _("Regelmäßige Termine mit kopieren") ?>
+            <?= _("RegelmÃ¤ÃŸige Termine mit kopieren") ?>
         </label>
     </fieldset>
     <div data-dialog-button>
