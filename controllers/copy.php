@@ -117,9 +117,9 @@ class CopyController extends PluginController
                             ));
                         }
 
-                        $copy_regular_room_assignments = false;
-                        if (Request::get('regular_room_assignments')) {
-                            $copy_regular_room_assignments = true;
+                        $copy_regular_room_bookings = false;
+                        if (Request::get('regular_room_bookings')) {
+                            $copy_regular_room_bookings = true;
                         }
 
                         if (Request::get("cycles")) {
@@ -132,23 +132,23 @@ class CopyController extends PluginController
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();
 
-                                if ($copy_regular_room_assignments) {
+                                if ($copy_regular_room_bookings) {
                                     //Check which room have been assigned to the
                                     //"old" course's dates. If it was always
                                     //the same room we can copy the regular
-                                    //assignments and use that room, if it is
+                                    //bookings and use that room, if it is
                                     //available.
 
                                     $old_room = null;
                                     $room = null;
                                     foreach ($cycledate->dates as $date) {
-                                        if ($date->room_assignment) {
-                                            if ($date->room_assignment->resource instanceof Resource) {
+                                        if ($date->room_booking) {
+                                            if ($date->room_booking->resource instanceof Resource) {
                                                 $old_room = $room;
-                                                $room = $date->room_assignment->resource->getDerivedClassInstance();
+                                                $room = $date->room_booking->resource->getDerivedClassInstance();
                                                 if (($old_room instanceof Room) && ($room->id != $old_room->id)) {
                                                     //The rooms differ: we can skip
-                                                    //copying the assignments.
+                                                    //copying the bookings.
                                                     $room = null;
                                                     break;
                                                 }
@@ -172,18 +172,18 @@ class CopyController extends PluginController
 
                                     if ($has_booking_rights) {
                                         foreach ($newcycle->dates as $date) {
-                                            //Create new assignments.
-                                            $assignment = new ResourceAssignment();
-                                            $assignment->resource_id = $room->id;
-                                            $assignment->range_id = $newcourse->id;
-                                            $assignment->booking_user_id = $GLOBALS['user']->id;
-                                            $assignment->assignment_type = '0';
-                                            $assignment->begin = $date->date;
-                                            $assignment->end = $date->end_time;
-                                            $assignment->repeat_end = '0';
-                                            $assignment->repeat_quantity = '0';
-                                            $assignment->repetition_interval = '';
-                                            $assignment->store();
+                                            //Create new bookings.
+                                            $booking = new ResourceBooking();
+                                            $booking->resource_id = $room->id;
+                                            $booking->range_id = $newcourse->id;
+                                            $booking->booking_user_id = $GLOBALS['user']->id;
+                                            $booking->booking_type = '0';
+                                            $booking->begin = $date->date;
+                                            $booking->end = $date->end_time;
+                                            $booking->repeat_end = '0';
+                                            $booking->repeat_quantity = '0';
+                                            $booking->repetition_interval = '';
+                                            $booking->store();
                                         }
                                     } else {
                                         //Create a resource request for the cycle:

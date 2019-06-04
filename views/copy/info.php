@@ -30,7 +30,7 @@
             <?= _("Regelmäßige Termine mit kopieren") ?>
         </label>
         <label>
-            <input type="checkbox" name="regular_room_assignments" value="1">
+            <input type="checkbox" name="regular_room_bookings" value="1">
             <?= _('Raumbuchungen von regelmäßigen Terminen kopieren') ?>
         </label>
     </fieldset>
