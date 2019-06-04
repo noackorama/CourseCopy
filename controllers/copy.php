@@ -4,6 +4,7 @@ class CopyController extends PluginController
 {
     public function info_action()
     {
+        PageLayout::setTitle(_("Wie soll kopiert werden?"));
         $this->dozentensearch = new SQLSearch(
             "SELECT DISTINCT auth_user_md5.user_id, CONCAT(auth_user_md5.Vorname, \" \", auth_user_md5.Nachname), auth_user_md5.perms, auth_user_md5.username " .
             "FROM auth_user_md5 LEFT JOIN user_info ON (user_info.user_id = auth_user_md5.user_id) " .
