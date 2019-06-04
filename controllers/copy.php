@@ -175,7 +175,7 @@ class CopyController extends PluginController
                                             //Create new bookings.
                                             $booking = new ResourceBooking();
                                             $booking->resource_id = $room->id;
-                                            $booking->range_id = $newcourse->id;
+                                            $booking->range_id = $date->id;
                                             $booking->booking_user_id = $GLOBALS['user']->id;
                                             $booking->booking_type = '0';
                                             $booking->begin = $date->date;
