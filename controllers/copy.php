@@ -166,9 +166,8 @@ class CopyController extends PluginController
                                     //create room bookings. If no booking permissions
                                     //are defined, create room requests.
 
-                                    $has_booking_rights = $room->userHasPermission(
-                                        User::findCurrent(),
-                                        'autor'
+                                    $has_booking_rights = $room->userHasBookingRights(
+                                        User::findCurrent()
                                     );
 
                                     if ($has_booking_rights) {
