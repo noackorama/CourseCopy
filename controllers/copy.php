@@ -31,6 +31,7 @@ class CopyController extends PluginController
             }
             $semester = Semester::find(Request::option("semester_id"));
             if ($semester) {
+                $errors = [];
                 foreach (Request::getArray("c") as $course_id) {
                     $oldcourse = Course::find($course_id);
 
@@ -183,7 +184,27 @@ class CopyController extends PluginController
                                             $booking->repeat_end = '0';
                                             $booking->repeat_quantity = '0';
                                             $booking->repetition_interval = '';
-                                            $booking->store();
+                                            try {
+                                                $booking->store();
+                                            } catch (ResourceBookingOverlapException $e) {
+                                                $errors[] = sprintf(
+                                                    dgettext(
+                                                        'CourseCopy',
+                                                        'Veranstaltung %1$s: Kopieren von Buchungen: %2$s'
+                                                    ),
+                                                    $oldcourse->name,
+                                                    $e->getMessage()
+                                                );
+                                            } catch (Exception $e) {
+                                                $errors[] = sprintf(
+                                                    dgettext(
+                                                        'CourseCopy',
+                                                        'Veranstaltung %1$s: %2$s'
+                                                    ),
+                                                    $oldcourse->name,
+                                                    $e->getMessage()
+                                                );
+                                            }
                                         }
                                     } else {
                                         //Create a resource request for the cycle:
@@ -199,7 +220,16 @@ class CopyController extends PluginController
                         }
                     }
                 }
-                PageLayout::postSuccess(_("Die Veranstaltungen wurden erfolgreich kopiert."));
+                if ($errors) {
+                    PageLayout::postError(
+                        dgettext('CourseCopy', 'Die folgenden Fehler traten beim Kopieren der Veranstaltungen auf:'),
+                        $errors
+                    );
+                } else {
+                    PageLayout::postSuccess(
+                        dgettext('CourseCopy', 'Die Veranstaltungen wurden erfolgreich kopiert!')
+                    );
+                }
             }
         }
         $this->redirect(URLHelper::getURL("dispatch.php/admin/courses/index"));
