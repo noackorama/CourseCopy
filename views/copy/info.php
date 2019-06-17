@@ -28,6 +28,10 @@
             <input type="checkbox" name="cycles" value="1" checked>
             <?= _("Regelmäßige Termine mit kopieren") ?>
         </label>
+        <label>
+            <input type="checkbox" name="lock_copied_courses" value="1">
+            <?= _('Kopierte Veranstaltungen sperren') ?>
+        </label>
     </fieldset>
     <div data-dialog-button>
         <?= \Studip\Button::create(_("Kopieren"), "copy", array('onclick' => "return window.confirm('"._("Wirklich kopieren?")."');")) ?>
