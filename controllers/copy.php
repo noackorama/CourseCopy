@@ -31,6 +31,7 @@ class CopyController extends PluginController
             }
             $semester = Semester::find(Request::option("semester_id"));
             if ($semester) {
+                $lock_copied_courses = Request::get('lock_copied_courses');
                 $errors = [];
                 foreach (Request::getArray("c") as $course_id) {
                     $oldcourse = Course::find($course_id);
@@ -43,6 +44,16 @@ class CopyController extends PluginController
                         $newcourse->setId($newcourse->getNewId());
                         $newcourse['start_time'] = $semester['beginn'];
                         $newcourse->store();
+
+                        if ($lock_copied_courses) {
+                            //Get the ID of the locked admission courseset:
+                            $locked_admission_id = CourseSet::getGlobalLockedAdmissionSetId();
+                            if ($locked_admission_id) {
+                                $locked_admission = new CourseSet($locked_admission_id);
+                                $locked_admission->addCourse($newcourse->id);
+                                $locked_admission->store();
+                            }
+                        }
 
                         //Dozenten
                         if ($dozent) {
