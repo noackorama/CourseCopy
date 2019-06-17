@@ -42,6 +42,16 @@ class CopyController extends PluginController
                         $newcourse['start_time'] = $semester['beginn'];
                         $newcourse->store();
 
+                        //Check if the old course is in at least one course
+                        //group ("LV-Gruppe") of the module managemeny system:
+                        $course_groups = Lvgruppe::findBySeminar($course_id);
+                        if ($course_groups) {
+                            //Add the copied course to all found course groups:
+                            foreach ($course_groups as $course_group) {
+                                $course_group->addSeminar($newcourse->id);
+                            }
+                        }
+
                         if ($lock_copied_courses) {
                             //Get the ID of the locked admission courseset:
                             $locked_admission_id = CourseSet::getGlobalLockedAdmissionSetId();
