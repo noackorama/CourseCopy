@@ -33,6 +33,10 @@
             <input type="checkbox" name="regular_room_bookings" value="1">
             <?= _('Raumbuchungen von regelmäßigen Terminen kopieren') ?>
         </label>
+        <label>
+            <input type="checkbox" name="lock_copied_courses" value="1">
+            <?= _('Kopierte Veranstaltungen sperren') ?>
+        </label>
     </fieldset>
     <div data-dialog-button>
         <?= \Studip\Button::create(_("Kopieren"), "copy", array('onclick' => "return window.confirm('"._("Wirklich kopieren?")."');")) ?>

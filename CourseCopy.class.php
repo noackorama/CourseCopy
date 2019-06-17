@@ -15,16 +15,12 @@ class CourseCopy extends StudIPPlugin implements AdminCourseAction
     }
 
     public function useMultimode() {
-        if (version_compare($GLOBALS['SOFTWARE_VERSION'], "3.4.99", ">=")) {
-            //Damit es im Dialog geöffnet wird
-            return \Studip\Button::createAccept(
-                dgettext('CourseCopy', 'Kopieren'),
-                'edit',
-                array('data-dialog' => 1)
-            );
-        } else {
-            return dgettext('CourseCopy', 'Kopieren');
-        }
+        //Damit es im Dialog geöffnet wird
+        return \Studip\Button::createAccept(
+            dgettext('CourseCopy', 'Kopieren'),
+            'edit',
+            array('data-dialog' => 1)
+        );
     }
 
     public function getAdminCourseActionTemplate($course_id, $values = null, $semester = null) {
