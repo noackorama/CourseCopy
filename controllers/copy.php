@@ -14,12 +14,17 @@ class CopyController extends PluginController
                 "OR auth_user_md5.username LIKE :input) " .
                 "AND " . get_vis_query() . " " .
                 "AND auth_user_md5.perms = 'dozent' " .
-            "ORDER BY Vorname, Nachname", _("Dozentennamen eingeben"), "user_id");
+            "ORDER BY Vorname, Nachname", _("Lehrendennamen eingeben"), "user_id");
     }
 
     public function process_action()
     {
         if (Request::isPost()) {
+            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "cycles", "resource_assignments") as $param) {
+                $config_name = "COURSECOPY_SETTINGS_".strtoupper($param);
+                UserConfig::get($GLOBALS['user']->id)->store($config_name, Request::get($param));
+            }
+
             $dozent = null;
             if (Request::option("dozent_id")) {
                 $dozent = User::find(Request::option("dozent_id"));
@@ -126,6 +131,29 @@ class CopyController extends PluginController
                                 $newcycle['mkdate'] = time();
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();
+
+                                if (Request::get("resource_assignments")) {
+                                    $statement = DBManager::get()->prepare("
+                                        SELECT resource_id 
+                                        FROM (
+                                            SELECT resource_id, COUNT(*) AS number
+                                            FROM termine 
+                                                INNER JOIN resources_assign ON (resources_assign.assign_user_id = termine.termin_id)
+                                            WHERE termine.metadate_id = :metadate_id
+                                            GROUP BY resources_assign.resource_id
+                                        ) AS counter
+                                        ORDER BY number DESC
+                                        LIMIT 1
+                                    ");
+                                    $statement->execute(array('metadate_id' => $cycledate->getId()));
+                                    $resource_id = $statement->fetch(PDO::FETCH_COLUMN, 0);
+                                    if ($resource_id) {
+                                        foreach ($newcycle->dates as $newdate) {
+                                            $singledate = new SingleDate($newdate);
+                                            $singledate->bookRoom($resource_id);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
