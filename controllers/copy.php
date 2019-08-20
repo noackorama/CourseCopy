@@ -30,14 +30,17 @@ class CopyController extends PluginController
     public function process_action()
     {
         if (Request::isPost()) {
-            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "cycles", "resource_assignments", "week_offset", "end_offset") as $param) {
+            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "cycles", "resource_assignments", "week_offset", "end_offset", "copy_tutors") as $param) {
                 $config_name = "COURSECOPY_SETTINGS_".strtoupper($param);
                 UserConfig::get($GLOBALS['user']->id)->store($config_name, Request::get($param));
             }
+            if (!Request::get("dozent_id_parameter")) { //quicksearch-special
+                UserConfig::get($GLOBALS['user']->id)->store("COURSECOPY_SETTINGS_DOZENT_ID", "");
+            }
 
             $dozent = null;
-            if (Request::option("dozent_id")) {
-                $dozent = User::find(Request::option("dozent_id"));
+            if (UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID) {
+                $dozent = User::find(UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID);
                 if (!$dozent['perms'] === "dozent") {
                     $dozent = null;
                 }
@@ -90,6 +93,19 @@ class CopyController extends PluginController
                             }) as $dozentmember) {
                                 $coursemember = new CourseMember();
                                 $coursemember->setData($dozentmember->toArray());
+                                $coursemember['seminar_id'] = $newcourse->getId();
+                                $coursemember['mkdate'] = time();
+                                $coursemember->store();
+                            }
+                        }
+
+                        //Tutor_innen
+                        if (Request::get("copy_tutors")) {
+                            foreach ($oldcourse->members->filter(function ($member) {
+                                return $member['status'] === "tutor";
+                            }) as $tutormember) {
+                                $coursemember = new CourseMember();
+                                $coursemember->setData($tutormember->toArray());
                                 $coursemember['seminar_id'] = $newcourse->getId();
                                 $coursemember['mkdate'] = time();
                                 $coursemember->store();

@@ -35,6 +35,11 @@
             ?>
 
             <label>
+                <input type="checkbox" name="copy_tutors" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_COPY_TUTORS ? " checked" : "" ?>>
+                <?= _('Tutor/-innen mit übernehmen') ?>
+            </label>
+
+            <label>
                 <input type="checkbox" name="lock_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_LOCK_COPIED_COURSES ? " checked" : "" ?>>
                 <?= _('Kopierte Veranstaltungen sperren') ?>
             </label>
