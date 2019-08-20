@@ -15,12 +15,22 @@ class CopyController extends PluginController
                 "AND " . get_vis_query() . " " .
                 "AND auth_user_md5.perms = 'dozent' " .
             "ORDER BY Vorname, Nachname", _("Lehrendennamen eingeben"), "user_id");
+        $this->semesters = array_reverse(Semester::getAll());
+        $this->semester = UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID
+            ? Semester::find(UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID)
+            : $this->semesters[0];
+    }
+
+    public function semester_start_und_ende_action($semester_id)
+    {
+        $this->semesters = array_reverse(Semester::getAll());
+        $this->semester = Semester::find($semester_id);
     }
 
     public function process_action()
     {
         if (Request::isPost()) {
-            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "cycles", "resource_assignments") as $param) {
+            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "cycles", "resource_assignments", "week_offset", "end_offset") as $param) {
                 $config_name = "COURSECOPY_SETTINGS_".strtoupper($param);
                 UserConfig::get($GLOBALS['user']->id)->store($config_name, Request::get($param));
             }
@@ -128,6 +138,10 @@ class CopyController extends PluginController
                                 $newcycle->setData($cycledate->toArray());
                                 $newcycle->setId($newcycle->getNewId());
                                 $newcycle['seminar_id'] = $newcourse->getId();
+                                $newcycle['week_offset'] = Request::get("week_offset");
+                                $newcycle['end_offset'] = Request::get("end_offset") !== 10000
+                                    ? Request::get("end_offset")
+                                    : floor(($semester['vorles_ende'] - $semester['vorles_beginn']) / (86400 * 7));
                                 $newcycle['mkdate'] = time();
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();
