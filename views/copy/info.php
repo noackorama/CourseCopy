@@ -43,6 +43,11 @@
                 <input type="checkbox" name="lock_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_LOCK_COPIED_COURSES ? " checked" : "" ?>>
                 <?= _('Kopierte Veranstaltungen sperren') ?>
             </label>
+
+            <label>
+                <input type="checkbox" name="invisible_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_INVISIBLE_COPIED_COURSES ? " checked" : "" ?>>
+                <?= _('Kopierte Veranstaltungen unsichtbar schalten') ?>
+            </label>
         </label>
 
     </fieldset>

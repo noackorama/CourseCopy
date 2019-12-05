@@ -30,7 +30,7 @@ class CopyController extends PluginController
     public function process_action()
     {
         if (Request::isPost()) {
-            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "cycles", "resource_assignments", "week_offset", "end_offset", "copy_tutors") as $param) {
+            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "invisible_copied_courses", "cycles", "resource_assignments", "week_offset", "end_offset", "copy_tutors") as $param) {
                 $config_name = "COURSECOPY_SETTINGS_".strtoupper($param);
                 UserConfig::get($GLOBALS['user']->id)->store($config_name, Request::get($param));
             }
@@ -48,6 +48,7 @@ class CopyController extends PluginController
             $semester = Semester::find(Request::option("semester_id"));
             if ($semester) {
                 $lock_copied_courses = Request::get('lock_copied_courses');
+                $invisible_copied_courses = Request::get('invisible_copied_courses');
                 foreach (Request::getArray("c") as $course_id) {
                     $oldcourse = Course::find($course_id);
 
@@ -58,6 +59,9 @@ class CopyController extends PluginController
                         $newcourse['mkdate'] = time();
                         $newcourse->setId($newcourse->getNewId());
                         $newcourse['start_time'] = $semester['beginn'];
+                        if ($invisible_copied_courses) {
+                            $newcourse['visible'] = 0;
+                        }
                         $newcourse->store();
 
                         //Check if the old course is in at least one course
