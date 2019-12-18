@@ -64,6 +64,13 @@ class CopyController extends PluginController
                         }
                         $newcourse->store();
 
+                        //copy avatar
+                        if (CourseAvatar::getAvatar($course_id)->is_customized()) {
+                            CourseAvatar::getAvatar($newcourse->getId())->createFrom(
+                                CourseAvatar::getAvatar($course_id)->getFilename(Avatar::NORMAL)
+                            );
+                        }
+
                         //Check if the old course is in at least one course
                         //group ("LV-Gruppe") of the module managemeny system:
                         $course_groups = Lvgruppe::findBySeminar($course_id);
@@ -152,8 +159,31 @@ class CopyController extends PluginController
                             $newentry->store();
                         }
 
+                        $wanted_course_configs = array("KURSVORABINFO_INFO");
+                        foreach ($wanted_course_configs as $config) {
+                            if (CourseConfig::get($course_id)->$config) {
+                                CourseConfig::get($newcourse->getId())->store($config, CourseConfig::get($course_id)->$config);
+                            }
+                        }
+
+
                         if (Request::get("cycles")) {
                             foreach ($oldcourse->cycles as $cycledate) {
+
+                                $statement = DBManager::get()->prepare("
+                                    SELECT date_typ
+                                    FROM (
+                                        SELECT termine.date_typ, COUNT(*) AS number
+                                        FROM termine 
+                                        WHERE termine.metadate_id = :metadate_id
+                                        GROUP BY termine.date_typ
+                                    ) AS counter
+                                    ORDER BY number DESC
+                                    LIMIT 1
+                                ");
+                                $statement->execute(array('metadate_id' => $cycledate->getId()));
+                                $date_type = $statement->fetch(PDO::FETCH_COLUMN, 0);
+
                                 $newcycle = new SeminarCycleDate();
                                 $newcycle->setData($cycledate->toArray());
                                 $newcycle->setId($newcycle->getNewId());
@@ -165,6 +195,11 @@ class CopyController extends PluginController
                                 $newcycle['mkdate'] = time();
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();
+
+                                foreach ($newcycle->dates as $newdate) {
+                                    $newdate['date_typ'] = $date_type;
+                                    $newdate->store();
+                                }
 
                                 if (Request::get("resource_assignments")) {
                                     $statement = DBManager::get()->prepare("
