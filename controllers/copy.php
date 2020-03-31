@@ -19,6 +19,7 @@ class CopyController extends PluginController
         $this->semester = UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID
             ? Semester::find(UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID)
             : $this->semesters[0];
+        $this->have_coursegroups = true;
     }
 
     public function semester_start_und_ende_action($semester_id)
@@ -30,7 +31,12 @@ class CopyController extends PluginController
     public function process_action()
     {
         if (Request::isPost()) {
-            foreach (array("semester_id", "dozent_id", "lock_copied_courses", "invisible_copied_courses", "cycles", "resource_assignments", "week_offset", "end_offset", "copy_tutors") as $param) {
+            $params = [
+                "semester_id", "dozent_id", "lock_copied_courses",
+                "invisible_copied_courses", "cycles", "resource_assignments",
+                "week_offset", "end_offset", "copy_tutors", "with_children"
+            ];
+            foreach ($params as $param) {
                 $config_name = "COURSECOPY_SETTINGS_".strtoupper($param);
                 UserConfig::get($GLOBALS['user']->id)->store($config_name, Request::get($param));
             }
@@ -49,12 +55,30 @@ class CopyController extends PluginController
             if ($semester) {
                 $lock_copied_courses = Request::get('lock_copied_courses');
                 $invisible_copied_courses = Request::get('invisible_copied_courses');
-                foreach (Request::getArray("c") as $course_id) {
+                $course_ids = Request::getArray("c");
+                if (Request::get("with_children")) {
+                    $statement = DBManager::get()->prepare("
+                        SELECT DISTINCT Seminar_id
+                        FROM seminare
+                        WHERE seminare.parent_course IN (?)
+                    ");
+                    $statement->execute([$course_ids]);
+                    $course_ids = array_merge($course_ids, $statement->fetchAll(PDO::FETCH_COLUMN, 0));
+                    $course_ids = array_unique($course_ids);
+                    //remind that the children should now be at the end of the array
+                }
+                $copies = [];
+                foreach ($course_ids as $course_id) {
                     $oldcourse = Course::find($course_id);
 
                     if ($oldcourse) {
                         $newcourse = new Course();
                         $newcourse->setData($oldcourse->toArray());
+                        if ($newcourse['parent_course']) {
+                            $newcourse['parent_course'] = isset($copies[$newcourse['parent_course']])
+                                ? $copies[$newcourse['parent_course']]
+                                : null;
+                        }
                         $newcourse['chdate'] = time();
                         $newcourse['mkdate'] = time();
                         $newcourse->setId($newcourse->getNewId());
@@ -63,6 +87,7 @@ class CopyController extends PluginController
                             $newcourse['visible'] = 0;
                         }
                         $newcourse->store();
+                        $copies[$course_id] = $newcourse->getId();
 
                         //copy avatar
                         if (CourseAvatar::getAvatar($course_id)->is_customized()) {
@@ -174,7 +199,7 @@ class CopyController extends PluginController
                                     SELECT date_typ
                                     FROM (
                                         SELECT termine.date_typ, COUNT(*) AS number
-                                        FROM termine 
+                                        FROM termine
                                         WHERE termine.metadate_id = :metadate_id
                                         GROUP BY termine.date_typ
                                     ) AS counter
@@ -203,10 +228,10 @@ class CopyController extends PluginController
 
                                 if (Request::get("resource_assignments")) {
                                     $statement = DBManager::get()->prepare("
-                                        SELECT resource_id 
+                                        SELECT resource_id
                                         FROM (
                                             SELECT resource_id, COUNT(*) AS number
-                                            FROM termine 
+                                            FROM termine
                                                 INNER JOIN resources_assign ON (resources_assign.assign_user_id = termine.termin_id)
                                             WHERE termine.metadate_id = :metadate_id
                                             GROUP BY resources_assign.resource_id

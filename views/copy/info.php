@@ -48,6 +48,13 @@
                 <input type="checkbox" name="invisible_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_INVISIBLE_COPIED_COURSES ? " checked" : "" ?>>
                 <?= _('Kopierte Veranstaltungen unsichtbar schalten') ?>
             </label>
+
+            <? if ($have_coursegroups) : ?>
+                <label>
+                    <input type="checkbox" name="with_children" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_WITH_CHILDREN ? " checked" : "" ?>>
+                    <?= _("Veranstaltungsgruppen inklusive Kindveranstaltungen kopieren") ?>
+                </label>
+            <? endif ?>
         </label>
 
     </fieldset>
