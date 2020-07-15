@@ -2,9 +2,13 @@
     <?= _("Startwoche") ?>
     <select name="week_offset">
         <? $i = 0 ?>
-        <? while ($semester['vorles_beginn'] + 86400 * 7 * $i < $semester['vorles_ende']) : ?>
+        <? while ($semester['vorles_beginn'] + 43200 + 86400 * 7 * $i < $semester['vorles_ende']) : ?>
             <option value="<?= $i ?>"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_WEEK_OFFSET == $i ? " checked" : "" ?>>
-                <?= sprintf(_("%s. Semesterwoche (ab %s)"), $i + 1, date("d.m.Y", $semester['vorles_beginn'] + 86400 * 7 * $i)) ?>
+                <?
+                $timestamp = $semester['vorles_beginn'] + 43200 + 86400 * 7 * $i;
+                $timestamp = $timestamp - ((date("w", $timestamp) - 1) % 7) * 86400;
+                ?>
+                <?= sprintf(_("%s. Semesterwoche (ab %s)"), $i + 1, date("d.m.Y", $timestamp)) ?>
             </option>
             <? $i++ ?>
         <? endwhile ?>
@@ -20,7 +24,11 @@
         <? $i = floor(($semester['vorles_ende'] - $semester['vorles_beginn']) / (86400 * 7)) - 1 ?>
         <? while ($i >= 0) : ?>
             <option value="<?= $i ?>"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_END_OFFSET == $i ? " checked" : "" ?>>
-                <?= sprintf(_("%s. Semesterwoche (ab %s)"), $i + 1, date("d.m.Y", $semester['vorles_beginn'] + 86400 * 7 * $i)) ?>
+                <?
+                $timestamp = $semester['vorles_beginn'] + 43200 + 86400 * 7 * $i;
+                $timestamp = $timestamp - ((date("w", $timestamp) - 1) % 7) * 86400;
+                ?>
+                <?= sprintf(_("%s. Semesterwoche (ab %s)"), $i + 1, date("d.m.Y", $timestamp)) ?>
             </option>
             <? $i-- ?>
         <? endwhile ?>
