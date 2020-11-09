@@ -34,7 +34,8 @@ class CopyController extends PluginController
             $params = [
                 "semester_id", "dozent_id", "lock_copied_courses",
                 "invisible_copied_courses", "cycles", "resource_assignments",
-                "week_offset", "end_offset", "copy_tutors", "with_children"
+                "week_offset", "end_offset", "copy_tutors", "with_children",
+                "contents_scm"
             ];
             foreach ($params as $param) {
                 $config_name = "COURSECOPY_SETTINGS_".strtoupper($param);
@@ -248,6 +249,17 @@ class CopyController extends PluginController
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        //Inhalte:
+                        if (Request::get("contents_scm")) {
+                            foreach (StudipScmEntry::findByRange_id($oldcourse->getId(), 'ORDER BY position ASC') as $scm) {
+                                $new_scm = new StudipScmEntry();
+                                $new_scm->setData($scm->toRawArray());
+                                $new_scm->setId($new_scm->getNewId());
+                                $new_scm['range_id'] = $newcourse->getId();
+                                $new_scm->store();
                             }
                         }
                     }

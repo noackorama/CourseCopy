@@ -83,6 +83,17 @@
 
     </fieldset>
 
+    <fieldset>
+        <legend><?= _("Inhalte") ?></legend>
+
+        <label>
+            <input type="checkbox"
+                   name="contents_scm"
+                   value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_CONTENTS_SCM ? " checked" : "" ?>>
+            <?= _("Freie Inhaltsseiten mit kopieren") ?>
+        </label>
+    </fieldset>
+
     <div data-dialog-button>
         <?= \Studip\Button::create(_("Kopieren"), "copy", array('onclick' => "return window.confirm('"._("Wirklich kopieren?")."');")) ?>
     </div>
