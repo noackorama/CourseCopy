@@ -4,22 +4,28 @@ class CopyController extends PluginController
 {
     public function info_action()
     {
-        PageLayout::setTitle(_("Wie soll kopiert werden?"));
-        $this->dozentensearch = new SQLSearch(
-            "SELECT DISTINCT auth_user_md5.user_id, CONCAT(auth_user_md5.Vorname, \" \", auth_user_md5.Nachname), auth_user_md5.perms, auth_user_md5.username " .
-            "FROM auth_user_md5 LEFT JOIN user_info ON (user_info.user_id = auth_user_md5.user_id) " .
-            "WHERE (CONCAT(auth_user_md5.Vorname, \" \", auth_user_md5.Nachname) LIKE :input " .
+        if (Request::getArray("c")) {
+            PageLayout::setTitle(_("Wie soll kopiert werden?"));
+            $this->dozentensearch = new SQLSearch(
+                "SELECT DISTINCT auth_user_md5.user_id, CONCAT(auth_user_md5.Vorname, \" \", auth_user_md5.Nachname), auth_user_md5.perms, auth_user_md5.username " .
+                "FROM auth_user_md5 LEFT JOIN user_info ON (user_info.user_id = auth_user_md5.user_id) " .
+                "WHERE (CONCAT(auth_user_md5.Vorname, \" \", auth_user_md5.Nachname) LIKE :input " .
                 "OR CONCAT(auth_user_md5.Nachname, \" \", auth_user_md5.Vorname) LIKE :input " .
                 "OR CONCAT(auth_user_md5.Nachname, \", \", auth_user_md5.Vorname) LIKE :input " .
                 "OR auth_user_md5.username LIKE :input) " .
                 "AND " . get_vis_query() . " " .
                 "AND auth_user_md5.perms = 'dozent' " .
-            "ORDER BY Vorname, Nachname", _("Lehrendennamen eingeben"), "user_id");
-        $this->semesters = array_reverse(Semester::getAll());
-        $this->semester = UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID
-            ? Semester::find(UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID)
-            : $this->semesters[0];
-        $this->have_coursegroups = true;
+                "ORDER BY Vorname, Nachname", _("Lehrendennamen eingeben"), "user_id");
+            $this->semesters = array_reverse(Semester::getAll());
+            $this->semester = UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID
+                ? Semester::find(UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_SEMESTER_ID)
+                : $this->semesters[0];
+            if (Seminar_Perm::get()->have_perm('admin')) {
+                $this->have_coursegroups = true;
+            }
+        } else {
+            throw new Trails_Exception(400);
+        }
     }
 
     public function semester_start_und_ende_action($semester_id)
@@ -30,7 +36,7 @@ class CopyController extends PluginController
 
     public function process_action()
     {
-        if (Request::isPost()) {
+        if (Request::isPost() && count(Request::getArray("c"))) {
             $params = [
                 "semester_id", "dozent_id", "lock_copied_courses",
                 "invisible_copied_courses", "cycles", "resource_assignments",
