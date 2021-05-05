@@ -20,21 +20,22 @@
                 <? endforeach ?>
             </select>
         </label>
-
-        <label>
-            <?= _("Lehrende ersetzen durch ...") ?>
-            <?
-            $qs = QuickSearch::get("dozent_id", $dozentensearch);
-            if (UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID) {
-                $qs->defaultValue(
-                    UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID,
-                    get_fullname(UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID)
-                );
-            }
-            echo $qs->render()
-            ?>
+        <? if (Seminar_Perm::get()->have_perm('admin')) : ?>
+            <label>
+                <?= _("Lehrende ersetzen durch ...") ?>
+                <?
+                $qs = QuickSearch::get("dozent_id", $dozentensearch);
+                if (UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID) {
+                    $qs->defaultValue(
+                        UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID,
+                        get_fullname(UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_DOZENT_ID)
+                    );
+                }
+                echo $qs->render()
+                ?>
 
             <label>
+                <? endif ?>
                 <input type="checkbox" name="copy_tutors" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_COPY_TUTORS ? " checked" : "" ?>>
                 <?= _('Tutor/-innen mit übernehmen') ?>
             </label>
