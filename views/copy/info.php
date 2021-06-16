@@ -89,10 +89,18 @@
 
         <label>
             <input type="checkbox"
+                   name="contents_documents"
+                   value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_CONTENTS_DOCUMENTS ? " checked" : "" ?>>
+            <?= _("Dateien mit kopieren") ?>
+        </label>
+
+        <label>
+            <input type="checkbox"
                    name="contents_scm"
                    value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_CONTENTS_SCM ? " checked" : "" ?>>
             <?= _("Freie Inhaltsseiten mit kopieren") ?>
         </label>
+
     </fieldset>
 
     <div data-dialog-button>

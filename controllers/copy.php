@@ -41,7 +41,7 @@ class CopyController extends PluginController
                 "semester_id", "dozent_id", "lock_copied_courses",
                 "invisible_copied_courses", "cycles", "resource_assignments",
                 "week_offset", "end_offset", "copy_tutors", "with_children",
-                "contents_scm"
+                "contents_scm", "contents_documents"
             ];
             foreach ($params as $param) {
                 $config_name = "COURSECOPY_SETTINGS_".strtoupper($param);
@@ -78,7 +78,7 @@ class CopyController extends PluginController
                 foreach ($course_ids as $course_id) {
                     $oldcourse = Course::find($course_id);
 
-                    if ($oldcourse) {
+                    if ($oldcourse && Seminar_Perm::get()->have_studip_perm('dozent', $course_id)) {
                         $newcourse = new Course();
                         $newcourse->setData($oldcourse->toArray());
                         if ($newcourse['parent_course']) {
@@ -266,6 +266,24 @@ class CopyController extends PluginController
                                 $new_scm->setId($new_scm->getNewId());
                                 $new_scm['range_id'] = $newcourse->getId();
                                 $new_scm->store();
+                            }
+                        }
+                        if (Request::get("contents_documents")) {
+                            $oldtopfolder = Folder::findTopFolder($oldcourse->getId());
+                            $newtopfolder = Folder::findTopFolder($newcourse->getId());
+                            foreach ($oldtopfolder->file_refs as $fileref) {
+                                FileManager::copyFile(
+                                    $fileref->getFileType(),
+                                    $newtopfolder->getTypedFolder(),
+                                    User::findCurrent()
+                                );
+                            }
+                            foreach ($oldtopfolder->subfolders as $subfolder) {
+                                FileManager::copyFolder(
+                                    $subfolder->getTypedFolder(),
+                                    $newtopfolder->getTypedFolder(),
+                                    User::findCurrent()
+                                );
                             }
                         }
                     }
