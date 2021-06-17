@@ -272,11 +272,19 @@ class CopyController extends PluginController
                             $oldtopfolder = Folder::findTopFolder($oldcourse->getId());
                             $newtopfolder = Folder::findTopFolder($newcourse->getId());
                             foreach ($oldtopfolder->file_refs as $fileref) {
-                                FileManager::copyFile(
-                                    $fileref->getFileType(),
-                                    $newtopfolder->getTypedFolder(),
-                                    User::findCurrent()
-                                );
+                                if (StudipVersion::newerThan("4.6")) {
+                                    FileManager::copyFile(
+                                        $fileref->getFileType(),
+                                        $newtopfolder->getTypedFolder(),
+                                        User::findCurrent()
+                                    );
+                                } else {
+                                    FileManager::copyFileRef(
+                                        $fileref,
+                                        $newtopfolder->getTypedFolder(),
+                                        User::findCurrent()
+                                    );
+                                }
                             }
                             foreach ($oldtopfolder->subfolders as $subfolder) {
                                 FileManager::copyFolder(
