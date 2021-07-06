@@ -23,6 +23,10 @@ class CopyController extends PluginController
             if (Seminar_Perm::get()->have_perm('admin')) {
                 $this->have_coursegroups = true;
             }
+            if (count(Request::getArray("c")) == 1) {
+                $this->single_course = Course::find(current(Request::getArray("c")));
+                $this->single_course_name = $course->name;
+            }
         } else {
             throw new Trails_Exception(400);
         }
@@ -62,6 +66,7 @@ class CopyController extends PluginController
             if ($semester) {
                 $lock_copied_courses = Request::get('lock_copied_courses');
                 $invisible_copied_courses = Request::get('invisible_copied_courses');
+                $single_course_name = Request::get('single_course_name');
                 $course_ids = Request::getArray("c");
                 if (Request::get("with_children")) {
                     $statement = DBManager::get()->prepare("
@@ -92,6 +97,9 @@ class CopyController extends PluginController
                         $newcourse['start_time'] = $semester['beginn'];
                         if ($invisible_copied_courses) {
                             $newcourse['visible'] = 0;
+                        }
+                        if ((count($course_ids) == 1) && ($single_course_name)) {
+                            $newcourse['name'] = $single_course_name;
                         }
                         $newcourse->store();
                         $copies[$course_id] = $newcourse->getId();
