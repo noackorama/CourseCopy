@@ -60,6 +60,23 @@
 
     </fieldset>
 
+    <? if (is_object($single_course)) : ?>
+    <fieldset>
+        <legend>
+            <?= _("Veranstaltungsname") ?>
+        </legend>
+
+        <label>
+            <?= _("Name der neuen Veranstaltung") ?>
+            <input type="text"
+                   required
+                   name="single_course_name"
+                   value="<?=  $single_course->name ?>">
+        </label>
+
+    </fieldset>
+    <? endif ?>
+
     <fieldset>
         <legend>
             <?= _("Termine") ?>
