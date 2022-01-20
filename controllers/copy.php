@@ -44,7 +44,7 @@ class CopyController extends PluginController
             $params = [
                 "semester_id", "dozent_id", "lock_copied_courses",
                 "invisible_copied_courses", "cycles", "resource_assignments",
-                "week_offset", "end_offset", "copy_tutors", "with_children",
+                "week_offset", "end_offset", "copy_tutors", "copy_statusgruppen", "with_children",
                 "contents_scm", "contents_documents"
             ];
             foreach ($params as $param) {
@@ -160,6 +160,18 @@ class CopyController extends PluginController
                                 $coursemember['seminar_id'] = $newcourse->getId();
                                 $coursemember['mkdate'] = time();
                                 $coursemember->store();
+                            }
+                        }
+
+                        //Statusgruppen
+                        if (Request::get("copy_statusgruppen")) {
+                            foreach ($oldcourse->statusgruppen as $statusgruppe) {
+                                $new_group = new Statusgruppen();
+                                $new_group->setData($statusgruppe->toArray());
+                                $new_group->setId($new_group->getNewId());
+                                $new_group['range_id'] = $newcourse->getId();
+                                $new_group['mkdate'] = time();
+                                $new_group->store();
                             }
                         }
 

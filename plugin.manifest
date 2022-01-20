@@ -1,6 +1,6 @@
 pluginname=CourseCopy
 pluginclassname=CourseCopy
-version=1.8.4
+version=1.9
 origin=data-quest
 studipMinVersion=4.0
-studipMaxVersion=5.0.99
+studipMaxVersion=5.1.99

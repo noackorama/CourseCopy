@@ -34,29 +34,35 @@
                 echo $qs->render()
                 ?>
 
-            <label>
-                <? endif ?>
-                <input type="checkbox" name="copy_tutors" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_COPY_TUTORS ? " checked" : "" ?>>
-                <?= _('Tutor/-innen mit übernehmen') ?>
             </label>
+        <? endif ?>
 
-            <label>
-                <input type="checkbox" name="lock_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_LOCK_COPIED_COURSES ? " checked" : "" ?>>
-                <?= _('Kopierte Veranstaltungen sperren') ?>
-            </label>
-
-            <label>
-                <input type="checkbox" name="invisible_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_INVISIBLE_COPIED_COURSES ? " checked" : "" ?>>
-                <?= _('Kopierte Veranstaltungen unsichtbar schalten') ?>
-            </label>
-
-            <? if ($have_coursegroups) : ?>
-                <label>
-                    <input type="checkbox" name="with_children" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_WITH_CHILDREN ? " checked" : "" ?>>
-                    <?= _("Veranstaltungsgruppen inklusive Kindveranstaltungen kopieren") ?>
-                </label>
-            <? endif ?>
+        <label>
+            <input type="checkbox" name="copy_tutors" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_COPY_TUTORS ? " checked" : "" ?>>
+            <?= _('Tutor/-innen mit übernehmen') ?>
         </label>
+
+        <label>
+            <input type="checkbox" name="copy_statusgruppen" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_COPY_STATUSGRUPPEN ? " checked" : "" ?>>
+            <?= _('Teilnehmergruppen mit übernehmen') ?>
+        </label>
+
+        <label>
+            <input type="checkbox" name="lock_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_LOCK_COPIED_COURSES ? " checked" : "" ?>>
+            <?= _('Kopierte Veranstaltungen sperren') ?>
+        </label>
+
+        <label>
+            <input type="checkbox" name="invisible_copied_courses" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_INVISIBLE_COPIED_COURSES ? " checked" : "" ?>>
+            <?= _('Kopierte Veranstaltungen unsichtbar schalten') ?>
+        </label>
+
+        <? if ($have_coursegroups) : ?>
+            <label>
+                <input type="checkbox" name="with_children" value="1"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_WITH_CHILDREN ? " checked" : "" ?>>
+                <?= _("Veranstaltungsgruppen inklusive Kindveranstaltungen kopieren") ?>
+            </label>
+        <? endif ?>
 
     </fieldset>
 
