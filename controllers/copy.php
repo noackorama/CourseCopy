@@ -254,18 +254,33 @@ class CopyController extends PluginController
                                 }
 
                                 if (Request::get("resource_assignments")) {
-                                    $statement = DBManager::get()->prepare("
-                                        SELECT resource_id
-                                        FROM (
-                                            SELECT resource_id, COUNT(*) AS number
-                                            FROM termine
-                                                INNER JOIN resources_assign ON (resources_assign.assign_user_id = termine.termin_id)
-                                            WHERE termine.metadate_id = :metadate_id
-                                            GROUP BY resources_assign.resource_id
-                                        ) AS counter
-                                        ORDER BY number DESC
-                                        LIMIT 1
-                                    ");
+                                    if (StudipVersion::newerThan("4.4.99")) {
+                                        $statement = DBManager::get()->prepare("
+                                            SELECT resource_id
+                                            FROM (
+                                                SELECT resource_bookings.resource_id, COUNT(*) AS number
+                                                FROM termine
+                                                    INNER JOIN resource_bookings ON (resource_bookings.range_id = termine.termin_id)
+                                                WHERE termine.metadate_id = :metadate_id
+                                                GROUP BY resource_bookings.resource_id
+                                            ) AS counter
+                                            ORDER BY number DESC
+                                            LIMIT 1
+                                        ");
+                                    } else {
+                                        $statement = DBManager::get()->prepare("
+                                            SELECT resource_id
+                                            FROM (
+                                                SELECT resource_id, COUNT(*) AS number
+                                                FROM termine
+                                                    INNER JOIN resources_assign ON (resources_assign.assign_user_id = termine.termin_id)
+                                                WHERE termine.metadate_id = :metadate_id
+                                                GROUP BY resources_assign.resource_id
+                                            ) AS counter
+                                            ORDER BY number DESC
+                                            LIMIT 1
+                                        ");
+                                    }
                                     $statement->execute(array('metadate_id' => $cycledate->getId()));
                                     $resource_id = $statement->fetch(PDO::FETCH_COLUMN, 0);
                                     if ($resource_id) {
@@ -274,6 +289,7 @@ class CopyController extends PluginController
                                             $singledate->bookRoom($resource_id);
                                         }
                                     }
+
                                 }
                             }
                         }
