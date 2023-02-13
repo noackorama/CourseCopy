@@ -83,7 +83,9 @@ class CopyController extends PluginController
                 foreach ($course_ids as $course_id) {
                     $oldcourse = Course::find($course_id);
 
-                    if ($oldcourse && Seminar_Perm::get()->have_studip_perm('dozent', $course_id)) {
+                    if ($oldcourse
+                            && Seminar_Perm::get()->have_studip_perm('dozent', $course_id)
+                            && !LockRules::check($course_id, 'seminar_copy')) {
                         $newcourse = new Course();
                         $newcourse->setData($oldcourse->toArray());
                         if ($newcourse['parent_course']) {
