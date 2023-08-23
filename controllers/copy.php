@@ -97,6 +97,7 @@ class CopyController extends PluginController
                         $newcourse['mkdate'] = time();
                         $newcourse->setId($newcourse->getNewId());
                         $newcourse['start_time'] = $semester['beginn'];
+                        $newcourse['duration_time'] = 0;
                         if ($invisible_copied_courses) {
                             $newcourse['visible'] = 0;
                         }
@@ -242,10 +243,8 @@ class CopyController extends PluginController
                                 $newcycle->setData($cycledate->toArray());
                                 $newcycle->setId($newcycle->getNewId());
                                 $newcycle['seminar_id'] = $newcourse->getId();
-                                $newcycle['week_offset'] = Request::get("week_offset");
-                                $newcycle['end_offset'] = Request::get("end_offset") !== 10000
-                                    ? Request::get("end_offset")
-                                    : floor(($semester['vorles_ende'] - $semester['vorles_beginn']) / (86400 * 7));
+                                $newcycle['week_offset'] = Request::int("week_offset");
+                                $newcycle['end_offset'] = Request::int("end_offset");
                                 $newcycle['mkdate'] = time();
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();

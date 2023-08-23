@@ -18,9 +18,6 @@
 <label>
     <?= _("Endwoche") ?>
     <select name="end_offset">
-        <option value="10000"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_END_OFFSET == 10000 ? " checked" : "" ?>>
-            <?= _("Letzte Semesterwoche") ?>
-        </option>
         <? $i = floor(($semester['vorles_ende'] - $semester['vorles_beginn']) / (86400 * 7)) - 1 ?>
         <? while ($i >= 0) : ?>
             <option value="<?= $i ?>"<?= UserConfig::get($GLOBALS['user']->id)->COURSECOPY_SETTINGS_END_OFFSET == $i ? " checked" : "" ?>>
