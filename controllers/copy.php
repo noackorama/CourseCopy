@@ -25,7 +25,7 @@ class CopyController extends PluginController
             }
             if (count(Request::getArray("c")) == 1) {
                 $this->single_course = Course::find(current(Request::getArray("c")));
-                $this->single_course_name = $course->name;
+                $this->single_course_name = $this->single_course;
             }
         } else {
             throw new Trails_Exception(400);
@@ -223,6 +223,7 @@ class CopyController extends PluginController
 
 
                         if (Request::get("cycles")) {
+                            $last_week = count($semester->getStartWeeks()) - 1;
                             foreach ($oldcourse->cycles as $cycledate) {
 
                                 $statement = DBManager::get()->prepare("
@@ -244,7 +245,7 @@ class CopyController extends PluginController
                                 $newcycle->setId($newcycle->getNewId());
                                 $newcycle['seminar_id'] = $newcourse->getId();
                                 $newcycle['week_offset'] = Request::int("week_offset");
-                                $newcycle['end_offset'] = Request::int("end_offset");
+                                $newcycle['end_offset'] = Request::get('end_offset') == 'last' ? $last_week : Request::int("end_offset");
                                 $newcycle['mkdate'] = time();
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();
