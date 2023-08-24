@@ -25,7 +25,7 @@ class CopyController extends PluginController
             }
             if (count(Request::getArray("c")) == 1) {
                 $this->single_course = Course::find(current(Request::getArray("c")));
-                $this->single_course_name = $course->name;
+                $this->single_course_name = $this->single_course;
             }
         } else {
             throw new Trails_Exception(400);
@@ -97,6 +97,7 @@ class CopyController extends PluginController
                         $newcourse['mkdate'] = time();
                         $newcourse->setId($newcourse->getNewId());
                         $newcourse['start_time'] = $semester['beginn'];
+                        $newcourse['duration_time'] = 0;
                         if ($invisible_copied_courses) {
                             $newcourse['visible'] = 0;
                         }
@@ -222,6 +223,7 @@ class CopyController extends PluginController
 
 
                         if (Request::get("cycles")) {
+                            $last_week = count($semester->getStartWeeks()) - 1;
                             foreach ($oldcourse->cycles as $cycledate) {
 
                                 $statement = DBManager::get()->prepare("
@@ -242,10 +244,8 @@ class CopyController extends PluginController
                                 $newcycle->setData($cycledate->toArray());
                                 $newcycle->setId($newcycle->getNewId());
                                 $newcycle['seminar_id'] = $newcourse->getId();
-                                $newcycle['week_offset'] = Request::get("week_offset");
-                                $newcycle['end_offset'] = Request::get("end_offset") !== 10000
-                                    ? Request::get("end_offset")
-                                    : floor(($semester['vorles_ende'] - $semester['vorles_beginn']) / (86400 * 7));
+                                $newcycle['week_offset'] = Request::int("week_offset");
+                                $newcycle['end_offset'] = Request::get('end_offset') == 'last' ? $last_week : Request::int("end_offset");
                                 $newcycle['mkdate'] = time();
                                 $newcycle['chdate'] = time();
                                 $newcycle->store();
