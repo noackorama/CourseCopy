@@ -1,6 +1,7 @@
 <?php
-$start_weeks = $semester->getStartWeeks();
-$last_week = count($start_weeks) - 1;
+if ($semester) {
+    $start_weeks = $semester->getStartWeeks();
+    $last_week = count($start_weeks) - 1;
 ?>
 <label>
     <?= _("Startwoche") ?>
@@ -29,3 +30,5 @@ $last_week = count($start_weeks) - 1;
         <? endforeach ?>
     </select>
 </label>
+<?php
+}
